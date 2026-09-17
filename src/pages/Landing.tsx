@@ -10,11 +10,16 @@ export function Landing() {
       <div className="relative overflow-hidden bg-navy-900 px-7 pb-10 pt-10 text-white">
         <CourtPattern className="absolute inset-0 h-full w-full opacity-70" />
         <div className="relative">
-          <div className="mb-10 flex items-center gap-2">
-            <Mountain size={20} />
-            <span className="text-[11px] font-bold tracking-[0.2em] text-white/80">
-              TENNIS ACADEMY
-            </span>
+          <div className="mb-10 flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
+              <Mountain size={18} />
+            </div>
+            <div>
+              <p className="text-[15px] font-extrabold leading-none tracking-wide">ASPEN</p>
+              <p className="mt-0.5 text-[9px] font-bold tracking-[0.2em] text-white/60">
+                TENNIS ACADEMY
+              </p>
+            </div>
           </div>
 
           <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gold-500">

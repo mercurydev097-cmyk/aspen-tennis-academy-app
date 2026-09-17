@@ -17,11 +17,16 @@ export function SignIn() {
   return (
     <div className="flex min-h-full flex-col">
       <div className="bg-navy-900 px-7 pb-8 pt-10 text-white">
-        <div className="mb-6 flex items-center gap-2">
-          <Mountain size={20} />
-          <span className="text-[11px] font-bold tracking-[0.2em] text-white/80">
-            TENNIS ACADEMY
-          </span>
+        <div className="mb-6 flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
+            <Mountain size={18} />
+          </div>
+          <div>
+            <p className="text-[15px] font-extrabold leading-none tracking-wide">ASPEN</p>
+            <p className="mt-0.5 text-[9px] font-bold tracking-[0.2em] text-white/60">
+              TENNIS ACADEMY
+            </p>
+          </div>
         </div>
         <h1 className="text-[26px] font-extrabold leading-tight">Welcome back</h1>
         <p className="mt-1 text-[13px] text-white/60">Good to see you again.</p>
