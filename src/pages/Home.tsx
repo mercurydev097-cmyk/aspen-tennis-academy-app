@@ -142,6 +142,9 @@ export function Home() {
         >
           Browse sessions <ChevronRight size={16} />
         </Button>
+        <button onClick={() => navigate("/about")} className="mt-3 w-full text-center text-[13px] font-semibold text-white/90 underline">
+          About the academy
+        </button>
       </div>
     </div>
   );

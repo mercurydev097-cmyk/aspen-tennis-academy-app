@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import {
+  describeWhen,
   initialFamily,
   initialUpcoming,
   sessions,
@@ -54,7 +55,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   };
 
   const addToCart: AppStateShape["addToCart"] = (sessionId, memberId) => {
-    setCart((c) => [...c, { sessionId, memberId }]);
+    setCart((c) =>
+      c.some((i) => i.sessionId === sessionId && i.memberId === memberId)
+        ? c
+        : [...c, { sessionId, memberId }]
+    );
   };
 
   const clearCart = () => setCart([]);
@@ -66,7 +71,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         id: `b-${Date.now()}-${i}`,
         sessionId: item.sessionId,
         memberId: item.memberId,
-        when: "Scheduled",
+        when: describeWhen(sessions.find((x) => x.id === item.sessionId)!),
       })),
     ]);
     setFamily((f) =>

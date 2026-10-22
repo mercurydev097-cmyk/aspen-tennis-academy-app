@@ -6,12 +6,19 @@ import {
   Bell,
   SlidersHorizontal,
   LogOut,
+  Info,
 } from "lucide-react";
 import { Avatar } from "../components/ui/Avatar";
 import { Card } from "../components/ui/Card";
 import { currentUser, savedCard } from "../data/mockData";
 
 const rows = [
+  {
+    to: "/about",
+    icon: Info,
+    label: "About Aspen Tennis Academy",
+    detail: "Our story, coach and courts",
+  },
   {
     to: "/profile/payment",
     icon: CreditCard,

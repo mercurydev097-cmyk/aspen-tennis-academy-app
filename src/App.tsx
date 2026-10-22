@@ -20,6 +20,7 @@ import { PaymentMethods } from "./pages/PaymentMethods";
 import { Notifications } from "./pages/Notifications";
 import { HelpSupport } from "./pages/HelpSupport";
 import { AppPreferences } from "./pages/AppPreferences";
+import { About } from "./pages/About";
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/confirmation" element={<BookingConfirmation />} />
 
+            <Route path="/about" element={<About />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/edit" element={<EditProfile />} />
             <Route path="/profile/payment" element={<PaymentMethods />} />
