@@ -24,26 +24,26 @@ export function Landing() {
 
           <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gold-500">
             <span className="h-1.5 w-1.5 rounded-full bg-gold-500" />
-            The Family Court, Reimagined
+            One Account, Every Program
           </span>
 
           <h1 className="text-[42px] font-extrabold leading-[1.05] tracking-tight">
-            One login.
+            One account.
             <br />
             Every
             <br />
-            court time.
+            class and camp.
           </h1>
 
           <p className="mt-5 max-w-[280px] text-[14px] leading-relaxed text-white/60">
-            Book your adult classes and your kid's camp in one place. One family
-            account, one easy checkout.
+            Book classes, camps, and events for your whole family, manage your
+            account, and keep in touch with us — all in one place.
           </p>
 
           <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
             <div className="mb-3 flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">
-                Your Family Pass
+                Your Family
               </span>
               <Sparkles size={14} className="text-ball" />
             </div>
@@ -58,7 +58,7 @@ export function Landing() {
               </div>
               <div>
                 <p className="text-[13px] font-semibold">Sarah + Max</p>
-                <p className="text-[12px] text-white/50">ready for their next rally</p>
+                <p className="text-[12px] text-white/50">all set for their next session</p>
               </div>
             </div>
           </div>

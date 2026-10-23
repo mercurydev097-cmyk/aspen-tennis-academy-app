@@ -30,7 +30,7 @@ export function SignUp() {
         </div>
         <h1 className="text-[26px] font-extrabold leading-tight">Create your family account</h1>
         <p className="mt-1 text-[13px] text-white/60">
-          One account gets everyone on the court.
+          Manage classes, camps, and events for your whole family.
         </p>
       </div>
 

@@ -3,10 +3,12 @@ import {
   describeWhen,
   initialFamily,
   initialUpcoming,
-  sessions,
   type FamilyMember,
+  type Session,
   type UpcomingBooking,
 } from "../data/mockData";
+import { uid, useData } from "../data/store";
+import type { PayMethod } from "../data/types";
 
 export interface CartItem {
   sessionId: string;
@@ -22,14 +24,15 @@ interface AppStateShape {
   removeFamilyMember: (id: string) => void;
   addToCart: (sessionId: string, memberId: string) => void;
   clearCart: () => void;
-  confirmBooking: () => void;
-  getSession: (id: string) => (typeof sessions)[number] | undefined;
+  confirmBooking: (opts?: { method?: PayMethod; promoCode?: string; discountRate?: number }) => void;
+  getSession: (id: string) => Session | undefined;
   getMember: (id: string) => FamilyMember | undefined;
 }
 
 const AppStateContext = createContext<AppStateShape | null>(null);
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
+  const { classes: sessions, addBookings, today } = useData();
   const [family, setFamily] = useState<FamilyMember[]>(initialFamily);
   const [upcoming, setUpcoming] = useState<UpcomingBooking[]>(initialUpcoming);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -64,7 +67,31 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const clearCart = () => setCart([]);
 
-  const confirmBooking = () => {
+  const confirmBooking: AppStateShape["confirmBooking"] = (opts = {}) => {
+    const rate = opts.discountRate ?? 0;
+    addBookings(
+      cart.flatMap((item, i) => {
+        const s = sessions.find((x) => x.id === item.sessionId);
+        const m = family.find((f) => f.id === item.memberId);
+        if (!s || !m) return [];
+        const discount = Math.round(s.price * rate * 100) / 100;
+        return [
+          {
+            id: uid(`b${i}`),
+            sessionId: s.id,
+            customerId: "c-sarah",
+            playerName: m.name,
+            amount: s.price - discount,
+            discount,
+            promoCode: rate > 0 ? opts.promoCode : undefined,
+            method: opts.method ?? "card",
+            status: "confirmed" as const,
+            checkedIn: false,
+            createdAt: today,
+          },
+        ];
+      })
+    );
     setUpcoming((u) => [
       ...u,
       ...cart.map((item, i) => ({
@@ -104,7 +131,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       getSession,
       getMember,
     }),
-    [family, upcoming, cart]
+    [family, upcoming, cart, sessions]
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

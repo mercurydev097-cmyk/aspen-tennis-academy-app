@@ -8,12 +8,14 @@ import { CourtPattern } from "../components/layout/CourtPattern";
 import { useAppState } from "../context/AppState";
 import { formatCurrency, cn } from "../lib/utils";
 import { formatLongDate } from "../data/mockData";
+import { useData } from "../data/store";
 
 export function SessionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getSession, family, addToCart } = useAppState();
   const session = getSession(id ?? "");
+  const { bookedCount, isFull } = useData();
 
   const eligibleMembers = useMemo(
     () => family.filter((m) => m.type === session?.type),
@@ -30,10 +32,12 @@ export function SessionDetail() {
   }
 
   const cancelled = session.status === "cancelled";
+  const full = isFull(session.id);
+  const spotsLeft = session.capacity ? Math.max(0, session.capacity - bookedCount(session.id)) : null;
   const dated = !!session.date;
 
   const handleBook = () => {
-    if (cancelled) return;
+    if (cancelled || full) return;
     if (selectedMemberId) addToCart(session.id, selectedMemberId);
     navigate("/cart");
   };
@@ -65,6 +69,11 @@ export function SessionDetail() {
         {cancelled && (
           <div className="mb-4 rounded-xl bg-red-50 p-3.5 text-[13px] font-semibold text-red-700">
             This class has been cancelled and can no longer be booked.
+          </div>
+        )}
+        {full && !cancelled && (
+          <div className="mb-4 rounded-xl bg-gold-50 p-3.5 text-[13px] font-semibold text-gold-500">
+            This class is full. Check back if a spot opens up.
           </div>
         )}
         {(session.level || session.program) && (
@@ -105,7 +114,10 @@ export function SessionDetail() {
         </div>
 
         {dated && (
-          <p className="mt-3 text-[11px] text-ink-500">Times shown in Central time (Chicago, GMT-5).</p>
+          <p className="mt-3 text-[11px] text-ink-500">
+            Times shown in Central time (Chicago, GMT-5).
+            {spotsLeft !== null && !cancelled && !full && spotsLeft <= 3 ? ` Only ${spotsLeft} spot${spotsLeft === 1 ? "" : "s"} left.` : ""}
+          </p>
         )}
 
         <div className="mt-5 rounded-xl bg-ink-100 p-4">
@@ -141,8 +153,8 @@ export function SessionDetail() {
           </div>
         </div>
 
-        <Button fullWidth className="mt-6" onClick={handleBook} disabled={!selectedMemberId || cancelled}>
-          {cancelled ? "Class cancelled" : "Book this session"} <ArrowLeft size={16} className="rotate-180" />
+        <Button fullWidth className="mt-6" onClick={handleBook} disabled={!selectedMemberId || cancelled || full}>
+          {cancelled ? "Class cancelled" : full ? "Class full" : "Book this session"} <ArrowLeft size={16} className="rotate-180" />
         </Button>
       </div>
     </div>

@@ -19,7 +19,9 @@ export interface Session {
   level?: string;
   program?: string; // series label shown under the title
   tag?: string; // named drill / team, used for the Team filter
-  status?: "open" | "cancelled";
+  status?: "open" | "cancelled" | "draft"; // draft = hidden from players
+  capacity?: number;
+  seriesId?: string; // groups weekly repeats so admin can edit the whole series
 }
 
 export interface FamilyMember {

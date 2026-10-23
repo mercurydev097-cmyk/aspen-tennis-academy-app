@@ -4,18 +4,15 @@ import { ChevronDown, ChevronLeft, ChevronRight, Clock, MapPin, Sparkles, UserRo
 import { Badge } from "../components/ui/Badge";
 import { Card } from "../components/ui/Card";
 import { SegmentedControl } from "../components/ui/SegmentedControl";
-import {
-  adultLocations,
-  adultTags,
-  formatLongDate,
-  sessions,
-  type ProgramType,
-  type Session,
-} from "../data/mockData";
+import { formatLongDate, type ProgramType, type Session } from "../data/mockData";
+import { classKey, useData } from "../data/store";
 import { cn, formatCurrency } from "../lib/utils";
 
-// Weeks run Sunday to Saturday, like the Momence schedule. Only weeks with classes are listed.
-const WEEK_STARTS = [new Date(2026, 9, 18), new Date(2026, 9, 25)];
+// Weeks run Sunday to Saturday, like the Momence schedule. Built from the classes the admin has published.
+function sundayOf(isoDate: string) {
+  const d = new Date(`${isoDate}T12:00:00`);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay());
+}
 const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
 function iso(d: Date) {
@@ -31,12 +28,13 @@ function weekDays(start: Date) {
   });
 }
 
-function ClassCard({ s, onOpen }: { s: Session; onOpen: () => void }) {
+function ClassCard({ s, onOpen, full }: { s: Session; onOpen: () => void; full: boolean }) {
   const cancelled = s.status === "cancelled";
+  const blocked = cancelled || full;
   return (
     <Card
-      onClick={cancelled ? undefined : onOpen}
-      className={cn("flex gap-3 p-4", cancelled ? "opacity-60" : "cursor-pointer")}
+      onClick={blocked ? undefined : onOpen}
+      className={cn("flex gap-3 p-4", blocked ? "opacity-60" : "cursor-pointer")}
     >
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-1.5">
@@ -62,10 +60,10 @@ function ClassCard({ s, onOpen }: { s: Session; onOpen: () => void }) {
         <span
           className={cn(
             "rounded-xl px-3.5 py-2 text-[12px] font-semibold",
-            cancelled ? "bg-ink-200 text-ink-500" : "bg-navy-900 text-white"
+            blocked ? "bg-ink-200 text-ink-500" : "bg-navy-900 text-white"
           )}
         >
-          {cancelled ? "Cancelled" : "Book now"}
+          {cancelled ? "Cancelled" : full ? "Full" : "Book now"}
         </span>
       </div>
     </Card>
@@ -80,10 +78,26 @@ export function Book() {
   const [location, setLocation] = useState<string>("all");
   const [tag, setTag] = useState<string>("all");
 
-  const adult = useMemo(() => sessions.filter((s) => s.type === "adult"), []);
-  const junior = useMemo(() => sessions.filter((s) => s.type === "junior"), []);
+  const { classes, settings, isFull } = useData();
+  const adult = useMemo(
+    () =>
+      classes
+        .filter((s) => s.type === "adult" && s.status !== "draft" && s.date)
+        .sort((a, b) => classKey(a).localeCompare(classKey(b))),
+    [classes]
+  );
+  const junior = useMemo(() => classes.filter((s) => s.type === "junior" && s.status !== "draft"), [classes]);
   const datesWithClasses = useMemo(() => new Set(adult.map((s) => s.date)), [adult]);
-  const days = weekDays(WEEK_STARTS[weekIdx]);
+  const weekStarts = useMemo(() => {
+    if (!adult.length) return [sundayOf("2026-10-23")];
+    const first = sundayOf(adult[0].date!);
+    const last = sundayOf(adult[adult.length - 1].date!);
+    const out: Date[] = [];
+    for (let d = first; d <= last; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7)) out.push(d);
+    return out;
+  }, [adult]);
+  const safeWeekIdx = Math.min(weekIdx, weekStarts.length - 1);
+  const days = weekDays(weekStarts[safeWeekIdx]);
 
   const filteredAdult = adult.filter(
     (s) =>
@@ -132,7 +146,7 @@ export function Book() {
           <div className="mt-3 flex items-center gap-1">
             <button
               aria-label="Previous week"
-              disabled={weekIdx === 0}
+              disabled={safeWeekIdx === 0}
               onClick={() => setWeekIdx((i) => i - 1)}
               className="flex h-8 w-8 items-center justify-center rounded-full text-navy-900 disabled:text-ink-300"
             >
@@ -166,7 +180,7 @@ export function Book() {
             </div>
             <button
               aria-label="Next week"
-              disabled={weekIdx === WEEK_STARTS.length - 1}
+              disabled={safeWeekIdx === weekStarts.length - 1}
               onClick={() => setWeekIdx((i) => i + 1)}
               className="flex h-8 w-8 items-center justify-center rounded-full text-navy-900 disabled:text-ink-300"
             >
@@ -188,7 +202,7 @@ export function Book() {
                 className="w-full appearance-none rounded-full border border-ink-200 bg-white py-2 pl-3.5 pr-8 text-[12px] font-medium text-navy-900"
               >
                 <option value="all">All locations</option>
-                {adultLocations.map((l) => (
+                {settings.locations.map((l) => (
                   <option key={l} value={l}>
                     {l}
                   </option>
@@ -203,7 +217,7 @@ export function Book() {
                 className="w-full appearance-none rounded-full border border-ink-200 bg-white py-2 pl-3.5 pr-8 text-[12px] font-medium text-navy-900"
               >
                 <option value="all">All drills</option>
-                {adultTags.map((t) => (
+                {settings.tags.map((t) => (
                   <option key={t} value={t}>
                     {t}
                   </option>
@@ -231,7 +245,7 @@ export function Book() {
                 </p>
                 <div className="flex flex-col gap-3">
                   {list.map((s) => (
-                    <ClassCard key={s.id} s={s} onOpen={() => navigate(`/session/${s.id}`)} />
+                    <ClassCard key={s.id} s={s} full={isFull(s.id)} onOpen={() => navigate(`/session/${s.id}`)} />
                   ))}
                 </div>
               </div>

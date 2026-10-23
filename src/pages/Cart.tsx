@@ -8,6 +8,7 @@ import { ScreenHeader } from "../components/layout/ScreenHeader";
 import { useAppState } from "../context/AppState";
 import { formatCurrency } from "../lib/utils";
 import { describeWhen, savedCard } from "../data/mockData";
+import { useData } from "../data/store";
 import { cn } from "../lib/utils";
 
 export function Cart() {
@@ -18,23 +19,33 @@ export function Cart() {
     .map((item) => ({ ...item, session: getSession(item.sessionId), member: getMember(item.memberId) }))
     .filter((i) => i.session && i.member);
 
+  const { checkPromo, settings } = useData();
+  const pay = settings.payments;
   const [promo, setPromo] = useState("");
-  const [applied, setApplied] = useState(false);
+  const [appliedCode, setAppliedCode] = useState("");
+  const [rate, setRate] = useState(0);
+  const [flat, setFlat] = useState(0);
   const [promoError, setPromoError] = useState("");
-  const [method, setMethod] = useState<"card" | "ach">("card");
+  const [method, setMethod] = useState<"card" | "ach">(pay.card ? "card" : "ach");
   const [oneClick, setOneClick] = useState(true);
 
   const subtotal = items.reduce((sum, i) => sum + (i.session?.price ?? 0), 0);
-  const discount = applied ? Math.round(subtotal * 0.1 * 100) / 100 : 0;
+  const applied = !!appliedCode;
+  const discount = Math.min(subtotal, Math.round((subtotal * rate + flat) * 100) / 100);
   const total = subtotal - discount;
 
   const applyPromo = () => {
-    if (promo.trim().toUpperCase() === "DEMO10") {
-      setApplied(true);
+    const res = checkPromo(promo);
+    if (res.ok) {
+      setAppliedCode(res.promo.code);
+      setRate(res.promo.type === "percent" ? res.promo.value / 100 : 0);
+      setFlat(res.promo.type === "amount" ? res.promo.value : 0);
       setPromoError("");
     } else {
-      setApplied(false);
-      setPromoError("This promo code is not valid.");
+      setAppliedCode("");
+      setRate(0);
+      setFlat(0);
+      setPromoError(res.reason);
     }
   };
 
@@ -45,7 +56,11 @@ export function Cart() {
       memberName: i.member!.name.split(" ")[0],
       when: describeWhen(i.session!),
     }));
-    confirmBooking();
+    confirmBooking({
+      method,
+      promoCode: appliedCode || undefined,
+      discountRate: subtotal > 0 ? discount / subtotal : 0,
+    });
     navigate("/confirmation", { state: { items: summary } });
   };
 
@@ -121,8 +136,8 @@ export function Cart() {
           </button>
         </div>
         {promoError && <p className="mt-1.5 text-[12px] text-red-600">{promoError}</p>}
-        {applied && <p className="mt-1.5 text-[12px] font-medium text-pine-600">DEMO10 applied: 10% off.</p>}
-        <p className="mt-1.5 text-[11px] text-ink-500">Demo: try DEMO10.</p>
+        {applied && <p className="mt-1.5 text-[12px] font-medium text-pine-600">{appliedCode} applied.</p>}
+        <p className="mt-1.5 text-[11px] text-ink-500">Demo: try DEMO10 or FALL5.</p>
       </div>
 
       {applied && (
@@ -163,6 +178,7 @@ export function Cart() {
           </button>
         </div>
         <div className="flex flex-col gap-2">
+          {pay.card && (
           <Card
             onClick={() => setMethod("card")}
             className={cn(
@@ -180,6 +196,8 @@ export function Cart() {
               <p className="text-[12px] text-ink-500">Card · Ready to use</p>
             </div>
           </Card>
+          )}
+          {pay.ach && (
           <Card
             onClick={() => setMethod("ach")}
             className={cn(
@@ -192,9 +210,10 @@ export function Cart() {
             </div>
             <div className="flex-1">
               <p className="text-[14px] font-medium text-navy-900">Bank account (ACH)</p>
-              <p className="text-[12px] text-ink-500">Direct debit · $0.00 processing fee</p>
+              <p className="text-[12px] text-ink-500">Direct debit · {formatCurrency(pay.achFee)} processing fee</p>
             </div>
           </Card>
+          )}
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-3">
