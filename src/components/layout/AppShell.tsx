@@ -2,11 +2,13 @@ import type { ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { AnimatePresence, motion } from "framer-motion";
+import { Splash, useSplash } from "../Splash";
 
 const TAB_ROUTES = ["/home", "/book", "/family", "/profile"];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
+  const splash = useSplash();
   const showNav = TAB_ROUTES.includes(location.pathname);
 
   return (
@@ -16,10 +18,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, x: 8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -8 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
+              initial={{ opacity: 0, x: 14, filter: "blur(2px)" }}
+              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
               className="min-h-full"
             >
               {children}
@@ -27,6 +29,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </AnimatePresence>
         </div>
         {showNav && <BottomNav />}
+        {splash.show && <Splash onDone={splash.close} />}
       </div>
     </div>
   );

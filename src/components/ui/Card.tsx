@@ -5,7 +5,8 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        "rounded-2xl bg-white shadow-[var(--shadow-card)]",
+        "rounded-2xl bg-white shadow-[var(--shadow-card)] transition-transform duration-150",
+        props.onClick && "active:scale-[0.985]",
         className
       )}
       {...props}

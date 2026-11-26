@@ -15,7 +15,7 @@ export function SessionDetail() {
   const navigate = useNavigate();
   const { getSession, family, addToCart } = useAppState();
   const session = getSession(id ?? "");
-  const { bookedCount, isFull } = useData();
+  const { bookedCount, isFull, waitlist, joinWaitlist, leaveWaitlist } = useData();
 
   const eligibleMembers = useMemo(
     () => family.filter((m) => m.type === session?.type),
@@ -35,6 +35,11 @@ export function SessionDetail() {
   const full = isFull(session.id);
   const spotsLeft = session.capacity ? Math.max(0, session.capacity - bookedCount(session.id)) : null;
   const dated = !!session.date;
+
+  const selMember = family.find((m) => m.id === selectedMemberId);
+  const mine = waitlist.filter((w) => w.sessionId === session.id);
+  const myEntry = mine.find((w) => selMember && w.playerName === selMember.name);
+  const myPos = myEntry ? mine.indexOf(myEntry) + 1 : 0;
 
   const handleBook = () => {
     if (cancelled || full) return;
@@ -73,7 +78,7 @@ export function SessionDetail() {
         )}
         {full && !cancelled && (
           <div className="mb-4 rounded-xl bg-gold-50 p-3.5 text-[13px] font-semibold text-gold-500">
-            This class is full. Check back if a spot opens up.
+            This class is full. Join the waitlist and we will let you know if a spot opens up.
           </div>
         )}
         {(session.level || session.program) && (
@@ -153,9 +158,25 @@ export function SessionDetail() {
           </div>
         </div>
 
-        <Button fullWidth className="mt-6" onClick={handleBook} disabled={!selectedMemberId || cancelled || full}>
-          {cancelled ? "Class cancelled" : full ? "Class full" : "Book this session"} <ArrowLeft size={16} className="rotate-180" />
-        </Button>
+        {full && !cancelled && (
+          <div className="mt-6">
+            {myEntry ? (
+              <div className="rounded-xl bg-pine-50 p-4 text-center">
+                <p className="text-[14px] font-bold text-pine-600">You are #{myPos} on the waitlist</p>
+                <p className="mt-0.5 text-[12px] text-ink-500">We will notify you the moment a spot opens.</p>
+                <button onClick={() => leaveWaitlist(myEntry.id)} className="mt-2 text-[12px] font-semibold text-ink-500 underline">Leave waitlist</button>
+              </div>
+            ) : (
+              <Button fullWidth disabled={!selMember} onClick={() => selMember && joinWaitlist({ sessionId: session.id, customerId: "c-sarah", playerName: selMember.name })}>
+                Join waitlist{mine.length ? ` (${mine.length} waiting)` : ""}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {!(full && !cancelled) && <Button fullWidth className="mt-6" onClick={handleBook} disabled={!selectedMemberId || cancelled || full}>
+          {cancelled ? "Class cancelled" : "Book this session"} <ArrowLeft size={16} className="rotate-180" />
+        </Button>}
       </div>
     </div>
   );

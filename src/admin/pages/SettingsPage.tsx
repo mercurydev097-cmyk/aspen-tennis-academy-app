@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { useData } from "../../data/store";
+import { DEFAULT_BANNER } from "../../data/types";
 import { Btn, Field, Modal, PageHeader, Panel, TextArea, TextInput } from "../ui";
 
 function ListEditor({ label, items, onChange, inUse }: { label: string; items: string[]; onChange: (v: string[]) => void; inUse?: (v: string) => number }) {
@@ -41,6 +42,8 @@ export function SettingsPage() {
   const a = settings.about;
   const setAbout = (patch: Partial<typeof a>) => updateSettings({ about: { ...a, ...patch } });
   const n = settings.notifications;
+  const bn = settings.banner ?? DEFAULT_BANNER;
+  const setBanner = (patch: Partial<typeof bn>) => updateSettings({ banner: { ...bn, ...patch } });
 
   return (
     <>
@@ -54,6 +57,17 @@ export function SettingsPage() {
             <ListEditor label="Drill tags" items={settings.tags} onChange={(v) => updateSettings({ tags: v })} inUse={(x) => classes.filter((c) => c.tag === x).length} />
           </div>
           <p className="mt-3 text-[12px] text-ink-500">Locations and drill tags appear as filters for players. An item can be removed only when no class uses it.</p>
+        </Panel>
+
+        <Panel title="Home screen offer banner">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Field label="Title"><TextInput value={bn.title} onChange={(e) => setBanner({ title: e.target.value })} /></Field>
+            <Field label="Text"><TextInput value={bn.text} onChange={(e) => setBanner({ text: e.target.value })} /></Field>
+            <Field label="Promo code shown"><TextInput value={bn.code} onChange={(e) => setBanner({ code: e.target.value.toUpperCase() })} /></Field>
+          </div>
+          <label className="mt-3 flex items-center gap-2 text-[13px] text-navy-900">
+            <input type="checkbox" checked={bn.enabled} onChange={(e) => setBanner({ enabled: e.target.checked })} /> Show banner in the player app
+          </label>
         </Panel>
 
         <Panel title="Booking rules">

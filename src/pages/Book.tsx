@@ -28,9 +28,9 @@ function weekDays(start: Date) {
   });
 }
 
-function ClassCard({ s, onOpen, full }: { s: Session; onOpen: () => void; full: boolean }) {
+function ClassCard({ s, onOpen, full, spots }: { s: Session; onOpen: () => void; full: boolean; spots: number | null }) {
   const cancelled = s.status === "cancelled";
-  const blocked = cancelled || full;
+  const blocked = cancelled;
   return (
     <Card
       onClick={blocked ? undefined : onOpen}
@@ -63,8 +63,11 @@ function ClassCard({ s, onOpen, full }: { s: Session; onOpen: () => void; full: 
             blocked ? "bg-ink-200 text-ink-500" : "bg-navy-900 text-white"
           )}
         >
-          {cancelled ? "Cancelled" : full ? "Full" : "Book now"}
+          {cancelled ? "Cancelled" : full ? "Waitlist" : "Book now"}
         </span>
+        {!cancelled && !full && spots !== null && spots <= 3 && (
+          <span className="mt-1 text-[11px] font-bold text-gold-500">{spots} spot{spots === 1 ? "" : "s"} left</span>
+        )}
       </div>
     </Card>
   );
@@ -78,7 +81,7 @@ export function Book() {
   const [location, setLocation] = useState<string>("all");
   const [tag, setTag] = useState<string>("all");
 
-  const { classes, settings, isFull } = useData();
+  const { classes, settings, isFull, bookedCount } = useData();
   const adult = useMemo(
     () =>
       classes
@@ -245,7 +248,7 @@ export function Book() {
                 </p>
                 <div className="flex flex-col gap-3">
                   {list.map((s) => (
-                    <ClassCard key={s.id} s={s} full={isFull(s.id)} onOpen={() => navigate(`/session/${s.id}`)} />
+                    <ClassCard key={s.id} s={s} full={isFull(s.id)} spots={s.capacity ? Math.max(0, s.capacity - bookedCount(s.id)) : null} onOpen={() => navigate(`/session/${s.id}`)} />
                   ))}
                 </div>
               </div>

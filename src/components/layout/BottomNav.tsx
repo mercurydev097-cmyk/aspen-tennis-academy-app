@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { Home, CalendarDays, Users, CircleUserRound } from "lucide-react";
+import { motion } from "framer-motion";
 import { cn } from "../../lib/utils";
 
 const items = [
@@ -16,15 +17,24 @@ export function BottomNav() {
         <NavLink
           key={to}
           to={to}
-          className="flex flex-col items-center gap-1"
+          className="relative flex flex-col items-center gap-1 px-2"
         >
           {({ isActive }) => (
             <>
+              {isActive && (
+                <motion.span
+                  layoutId="nav-pill"
+                  className="absolute -top-3 h-[3px] w-8 rounded-full bg-ball"
+                  transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                />
+              )}
+              <motion.div animate={{ scale: isActive ? 1.12 : 1, y: isActive ? -1 : 0 }} transition={{ type: "spring", stiffness: 400, damping: 20 }}>
               <Icon
                 size={22}
                 strokeWidth={2.1}
                 className={cn(isActive ? "text-navy-900" : "text-ink-300")}
               />
+              </motion.div>
               <span
                 className={cn(
                   "text-[11px] font-medium",

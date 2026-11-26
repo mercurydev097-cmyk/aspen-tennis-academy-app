@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session } from "./mockData";
 import { buildSeed, DEMO_TODAY } from "./seed";
-import type { Booking, BookingStatus, Customer, DataSnapshot, Promo, Settings } from "./types";
+import type { Booking, BookingStatus, Customer, DataSnapshot, Promo, Settings, WaitlistEntry } from "./types";
 
 const KEY = "aspen-data-v1";
 
@@ -62,6 +62,9 @@ export type PromoCheck = { ok: true; promo: Promo } | { ok: false; reason: strin
 
 interface DataShape extends DataSnapshot {
   today: string;
+  waitlist: WaitlistEntry[];
+  joinWaitlist: (e: Omit<WaitlistEntry, "id" | "createdAt">) => void;
+  leaveWaitlist: (id: string) => void;
   // classes
   addClasses: (list: Session[]) => void;
   updateClass: (id: string, patch: Partial<Session>) => void;
@@ -119,6 +122,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return {
       ...data,
       today: DEMO_TODAY,
+      waitlist: data.waitlist ?? [],
+      joinWaitlist: (e) =>
+        set((d) => {
+          const list = d.waitlist ?? [];
+          if (list.some((x) => x.sessionId === e.sessionId && x.playerName === e.playerName)) return d;
+          return { ...d, waitlist: [...list, { ...e, id: uid("w"), createdAt: DEMO_TODAY }] };
+        }),
+      leaveWaitlist: (id) => set((d) => ({ ...d, waitlist: (d.waitlist ?? []).filter((x) => x.id !== id) })),
       addClasses: (list) => set((d) => ({ ...d, classes: [...d.classes, ...list] })),
       updateClass: (id, patch) =>
         set((d) => ({ ...d, classes: d.classes.map((c) => (c.id === id ? { ...c, ...patch } : c)) })),

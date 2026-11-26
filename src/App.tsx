@@ -22,6 +22,9 @@ import { Notifications } from "./pages/Notifications";
 import { HelpSupport } from "./pages/HelpSupport";
 import { AppPreferences } from "./pages/AppPreferences";
 import { About } from "./pages/About";
+import { Onboarding } from "./pages/Onboarding";
+import { Pass } from "./pages/Pass";
+import { Rewards } from "./pages/Rewards";
 import { AdminLayout, AdminLogin, RequireAdmin } from "./admin/AdminLayout";
 import { Overview } from "./admin/pages/Overview";
 import { Schedule } from "./admin/pages/Schedule";
@@ -53,6 +56,9 @@ function Screens() {
     <AppShell>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/welcome" element={<Onboarding />} />
+        <Route path="/pass/:id" element={<Pass />} />
+        <Route path="/rewards" element={<Rewards />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -46,6 +46,28 @@ export interface Promo {
   expires?: string; // ISO date
 }
 
+export interface WaitlistEntry {
+  id: string;
+  sessionId: string;
+  customerId: string;
+  playerName: string;
+  createdAt: string; // ISO date
+}
+
+export interface OfferBanner {
+  enabled: boolean;
+  title: string;
+  text: string;
+  code: string;
+}
+
+export const DEFAULT_BANNER: OfferBanner = {
+  enabled: true,
+  title: "Holiday court special",
+  text: "10% off any adult drill this week.",
+  code: "DEMO10",
+};
+
 export interface AboutContent {
   paragraphs: string[];
   established: number;
@@ -75,6 +97,7 @@ export interface Settings {
     oneClickDefault: boolean;
   };
   about: AboutContent;
+  banner?: OfferBanner;
 }
 
 export interface DataSnapshot {
@@ -83,4 +106,5 @@ export interface DataSnapshot {
   customers: Customer[];
   promos: Promo[];
   settings: Settings;
+  waitlist?: WaitlistEntry[];
 }

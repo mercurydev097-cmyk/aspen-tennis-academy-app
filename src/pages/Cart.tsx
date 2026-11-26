@@ -8,7 +8,7 @@ import { ScreenHeader } from "../components/layout/ScreenHeader";
 import { useAppState } from "../context/AppState";
 import { formatCurrency } from "../lib/utils";
 import { describeWhen, savedCard } from "../data/mockData";
-import { useData } from "../data/store";
+import { useData, to24h } from "../data/store";
 import { cn } from "../lib/utils";
 
 export function Cart() {
@@ -55,6 +55,10 @@ export function Cart() {
       type: i.session!.type,
       memberName: i.member!.name.split(" ")[0],
       when: describeWhen(i.session!),
+      date: i.session!.date,
+      startTime: to24h(i.session!.startTime),
+      endTime: to24h(i.session!.endTime),
+      location: i.session!.location,
     }));
     confirmBooking({
       method,

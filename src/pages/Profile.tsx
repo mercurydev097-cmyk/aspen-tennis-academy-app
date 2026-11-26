@@ -7,12 +7,19 @@ import {
   SlidersHorizontal,
   LogOut,
   Info,
+  Crown,
 } from "lucide-react";
 import { Avatar } from "../components/ui/Avatar";
 import { Card } from "../components/ui/Card";
 import { currentUser, savedCard } from "../data/mockData";
 
 const rows = [
+  {
+    to: "/rewards",
+    icon: Crown,
+    label: "Aspen Rewards",
+    detail: "Points, tiers and perks",
+  },
   {
     to: "/about",
     icon: Info,
